@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import Input from './ui/input';
-import Button from './ui/button';
-import Slider from './ui/slider';
-import MilkYieldChart from './MilkYieldChart';
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import { Input } from './ui/input'
+import { Button } from './ui/button'
+import { Slider } from './ui/slider'
+import MilkYieldChart from './MilkYieldChart'
 
 const GreenhouseGasAnalysisTool = () => {
  
