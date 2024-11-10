@@ -1,19 +1,45 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
-import { Input } from './ui/input'
-import { Button } from './ui/button'
-import { Slider } from './ui/slider'
-import MilkYieldChart from './MilkYieldChart'
-
+// Utility functions moved inside component
 const GreenhouseGasAnalysisTool = () => {
- 
-  const CONFIG = useMemo(() => ({
+  // Utility functions
+  const calculateEmissions = (feed) => {
+    const baseEmissions = 1.39;
+    const feedImpact = 0.05;
+    return +(baseEmissions + feedImpact * (feed - 8.08)).toFixed(2);
+  };
+
+  const calculateMilkYield = (feed) => {
+    const baseMilkYield = 8750;
+    const yieldImpact = 100;
+    return Math.round(baseMilkYield + yieldImpact * (feed - 8.08));
+  };
+
+  const calculateCostPerLitre = (feed, milkYield, feedCostPerKg) => {
+    const dailyFeedCost = feed * feedCostPerKg;
+    const annualFeedCost = dailyFeedCost * 365;
+    return +(0.25 + annualFeedCost / milkYield).toFixed(2);
+  };
+
+  const calculateProteinEfficiency = (feed) => {
+    const baseEfficiency = 14.3;
+    const efficiencyImpact = -0.1;
+    return +(baseEfficiency + efficiencyImpact * (feed - 8.08)).toFixed(1);
+  };
+
+  const calculateNitrogenEfficiency = (nitrogenRate) => {
+    const baseEfficiency = 17.6;
+    const efficiencyImpact = -0.02;
+    return +(baseEfficiency + efficiencyImpact * (nitrogenRate - 180)).toFixed(1);
+  };
+
+  // Configuration
+  const CONFIG = {
     BASE_COSTS: 0.25,
     EMISSION_THRESHOLD: 1.5,
     COST_THRESHOLD: 0.35,
     TARGET_YIELD: 9000,
-  }), []);
+  };
 
-  
+  // State declarations
   const [feedCostPerKg, setFeedCostPerKg] = useState(0.38);
   const [params, setParams] = useState({
     concentrateFeed: 8.08,
@@ -44,11 +70,11 @@ const GreenhouseGasAnalysisTool = () => {
   // Event Handlers
   const handleConcentrateFeedChange = useCallback((value) => {
     updateParams(value[0], params.nitrogenRate);
-  }, [params.nitrogenRate, updateParams]);
+  }, [params.nitrogenRate]);
 
   const handleNitrogenRateChange = useCallback((value) => {
     updateParams(params.concentrateFeed, value[0]);
-  }, [params.concentrateFeed, updateParams]);
+  }, [params.concentrateFeed]);
 
   const handleFeedCostChange = useCallback((e) => {
     const newCost = parseFloat(e.target.value);
@@ -56,7 +82,7 @@ const GreenhouseGasAnalysisTool = () => {
       setFeedCostPerKg(newCost);
       updateParams(params.concentrateFeed, params.nitrogenRate);
     }
-  }, [params.concentrateFeed, params.nitrogenRate, updateParams]);
+  }, [params.concentrateFeed, params.nitrogenRate]);
 
   const handleQuerySubmit = useCallback(() => {
     if (!query.trim()) return;
@@ -258,7 +284,7 @@ const GreenhouseGasAnalysisTool = () => {
             min={0}
             max={20}
             step={0.1}
-            value={params.concentrateFeed}
+            value={[params.concentrateFeed]} // Updated to be an array
             onValueChange={handleConcentrateFeedChange}
           />
         </div>
@@ -285,7 +311,7 @@ const GreenhouseGasAnalysisTool = () => {
             min={0}
             max={300}
             step={1}
-            value={params.nitrogenRate}
+            value={[params.nitrogenRate]} // Updated to be an array
             onValueChange={handleNitrogenRateChange}
           />
         </div>
@@ -321,37 +347,6 @@ const GreenhouseGasAnalysisTool = () => {
       </div>
     </div>
   );
-};
-
-// Utility Functions (Outside Component)
-const calculateEmissions = (feed) => {
-  const baseEmissions = 1.39;
-  const feedImpact = 0.05;
-  return +(baseEmissions + feedImpact * (feed - 8.08)).toFixed(2);
-};
-
-const calculateMilkYield = (feed) => {
-  const baseMilkYield = 8750;
-  const yieldImpact = 100;
-  return Math.round(baseMilkYield + yieldImpact * (feed - 8.08));
-};
-
-const calculateCostPerLitre = (feed, milkYield, feedCostPerKg) => {
-  const dailyFeedCost = feed * feedCostPerKg;
-  const annualFeedCost = dailyFeedCost * 365;
-  return +(0.25 + annualFeedCost / milkYield).toFixed(2);
-};
-
-const calculateProteinEfficiency = (feed) => {
-  const baseEfficiency = 14.3;
-  const efficiencyImpact = -0.1;
-  return +(baseEfficiency + efficiencyImpact * (feed - 8.08)).toFixed(1);
-};
-
-const calculateNitrogenEfficiency = (nitrogenRate) => {
-  const baseEfficiency = 17.6;
-  const efficiencyImpact = -0.02;
-  return +(baseEfficiency + efficiencyImpact * (nitrogenRate - 180)).toFixed(1);
 };
 
 export default GreenhouseGasAnalysisTool;
