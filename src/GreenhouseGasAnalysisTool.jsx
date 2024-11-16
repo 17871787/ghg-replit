@@ -1,11 +1,15 @@
+import { useState, useCallback, useEffect, useMemo } from 'react';
+import { Button, Input, Slider } from '...';
+import { MilkYieldChart } from '...';
+
 // Utility functions moved inside component
 const GreenhouseGasAnalysisTool = () => {
   // Utility functions
-  const calculateEmissions = (feed) => {
+  const calculateEmissions = useCallback((feed) => {
     const baseEmissions = 1.39;
     const feedImpact = 0.05;
     return +(baseEmissions + feedImpact * (feed - 8.08)).toFixed(2);
-  };
+  }, []);
 
   const calculateMilkYield = (feed) => {
     const baseMilkYield = 8750;
@@ -128,9 +132,17 @@ const GreenhouseGasAnalysisTool = () => {
     };
 
     setParams(newParams);
-    addChangeMessage(oldParams, newParams);
-    updateMilkYieldData(newParams);
-  }, [feedCostPerKg, params]);
+    setMessages(prev => [...prev, {
+      type: 'info',
+      text: 'Parameters updated successfully'
+    }]);
+    setMilkYieldData(prev => [...prev.slice(-3), {
+      month: 'May',
+      milkYield: newParams.milkYield,
+      target: CONFIG.TARGET_YIELD,
+      cost: newParams.costPerLitre
+    }]);
+  }, [feedCostPerKg, params, calculateEmissions, calculateMilkYield, calculateCostPerLitre, calculateProteinEfficiency, calculateNitrogenEfficiency]);
 
   // Add Change Message to Messages
   const addChangeMessage = useCallback((oldParams, newParams) => {
@@ -147,19 +159,6 @@ const GreenhouseGasAnalysisTool = () => {
 - N efficiency: ${oldParams.nitrogenEfficiency}% → ${newParams.nitrogenEfficiency}%`
     }]);
   }, []);
-
-  // Update Milk Yield Data for Chart
-  const updateMilkYieldData = useCallback((newParams) => {
-    setMilkYieldData(prev => [
-      ...prev.slice(-3), // Keep last 3 data points
-      {
-        month: 'May',
-        milkYield: newParams.milkYield,
-        target: CONFIG.TARGET_YIELD,
-        cost: newParams.costPerLitre
-      }
-    ]);
-  }, [CONFIG.TARGET_YIELD]);
 
   // Generate Optimization Suggestions
   useEffect(() => {
